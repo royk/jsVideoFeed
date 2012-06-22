@@ -2,12 +2,16 @@
 var ServerAPI = (function () {
 	"use strict";
 	return {
-		call: function call(url, cb) {
+		call: function call(url, cb, query) {
+			query = query || "";
 			var req = new XMLHttpRequest();
 			req.onreadystatechange = function(){
 				if (req.readyState==4 && req.status==200){
 	            	cb(req.responseText);
 	            }
+	        }
+	        if (query){
+	        	url = url + "?" + query;
 	        }
 	        req.open("GET", url, true);
 	        req.send();
@@ -40,14 +44,23 @@ var TemplateConstructor = (function(){
 
 var DomConstructor = (function(){
 	"use strict";
+	var elements = [];
 	return {
 		construct: function construct(params) {
 			var elem 		= document.createElement(params.elemType),
-				container 	= document.getElementById(params.containerId);
-
+				container 	= document.getElementById("container");
+			elem.style.paddingBottom = "50px";
 			elem.innerHTML = params.content;
 			container.appendChild(elem);
+			elements.push(elem);
 			return elem;
+		},
+		clean: function clean() {
+			var container 	= document.getElementById("container");
+			elements.forEach(function(elem) {
+				container.removeChild(elem);
+			});
+			elements = [];
 		}
 	};
 
@@ -62,23 +75,30 @@ var VideoFeed = (function () {
 
 	    createElement = function(element){
 	    	if (element){
-				dom.construct({	containerId :"container", 
-							elemType 	:"div", 
-							content 	: template.construct(templates[element.type], element)
+				dom.construct({	elemType 	:"div", 
+								content 	: template.construct(templates[element.type.toLowerCase()], element)
 				});		
 			}
 		};
 	return {
-		requestFeed: function requestFeed(url) {
+		requestFeed: function requestFeed() {
+			dom.clean();
 			var onResponse = function onResponse(json) {
 				var result = JSON.parse(json);
 				result.forEach(createElement);
 			};	
-			serverAPI.call(url, onResponse);
+			serverAPI.call("http://footbagisrael.com/slim/getAll", onResponse);
 		},
-		saveFeed: function saveFeed() {
-			console.log("savefeed");
+		searchByTags: function searchByTags(tags) {
+			dom.clean();
+			var onResponse = function onResponse(json) {
+				var result = JSON.parse(json);
+				result.forEach(createElement);
+			};	
+			serverAPI.call("http://footbagisrael.com/slim/search", onResponse, "tags="+tags);
 		}
+
+		
 	};
 
 }());
