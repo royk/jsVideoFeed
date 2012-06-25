@@ -1,0 +1,80 @@
+<script type="text/javascript" src="../video_feed/VideoFeed.js"></script>
+<script type="text/javascript" src="../video_feed/VideoFeedCMS.js"></script>
+<script type="text/javascript" src="http://code.jquery.com/jquery-1.7.2.min.js"></script>
+<input id="searchTerms" onkeydown="if (event.keyCode == 13) doSearch()" placeholder="Search by tag or title"/>
+<div id="controlsOpener" style="color:pink; cursor:pointer">&#9660; Add video</div>
+<div id="controls" style="width:0; height:100%; display:none">
+<input id="url" placeholder="Viemo or youtube URL " required/>
+Optional:
+<input id="title" placeholder="Title" required/>
+<input id="players" placeholder="Shredders in the video" />
+<input id="maker" placeholder="Video maker name" />
+<input id="year" placeholder="Release year of video" />
+<input id="location" placeholder="Event or location name" />
+<input id="tags" placeholder="Any other searchable info" required/>
+<button type="button" onclick="doSend()">Send</button>
+<div id="result" style="color: red; padding: 5px; width:200px"></div>
+</div>
+<div id="container"/>
+<script type="text/javascript">
+var requestIndex = 0;
+var canRequestMore = true;
+$(window).scroll(function(){
+		if (document.body.scrollHeight - document.body.scrollTop == $(window).height()) {
+if (canRequestMore==false)
+return;
+setTimeout(function(){
+canRequestMore = true;
+}, 1000);
+canRequestMore = false;
+			requestIndex += 5;
+VideoFeed.requestFeed(requestIndex);
+		}
+	});
+	$("#controlsOpener").click(function(){
+		if ($("#controls").is(":hidden")){
+			$("#controls").slideDown("fast");
+		}else{
+			$("#controls").hide();
+		}
+	});
+	var doSend = function doSend(){
+		var params = {
+			title : document.getElementById("title").value,
+			url : document.getElementById("url").value,
+			tags : document.getElementById("tags").value,
+			players : document.getElementById("players").value,
+			maker : document.getElementById("maker").value,
+			year : document.getElementById("year").value,
+			location : document.getElementById("location").value
+		};
+		var cb = function callback(message, success) {
+			if (success) {
+				document.getElementById("title").value = "";
+				document.getElementById("url").value = "";
+				document.getElementById("tags").value = "";
+				document.getElementById("players").value = "";
+				document.getElementById("maker").value = "";
+				document.getElementById("year").value = "";
+				document.getElementById("location").value = "";
+				$("#controls").hide();
+			}
+			document.getElementById("result").innerText = message;
+		};
+		VideoFeedCMS.create(params, cb);
+	}
+</script>
+<script type="text/javascript">
+VideoFeed.requestFeed(requestIndex);
+var doSearch = function doSearch(){
+var tags = document.getElementById("searchTerms").value;
+if (tags){
+VideoFeed.searchByTags(tags);
+requestIndex = 0;
+canRequestMore = false;
+}else{
+VideoFeed.requestFeed(requestIndex);
+canRequestMore = true
+}
+};
+</script>

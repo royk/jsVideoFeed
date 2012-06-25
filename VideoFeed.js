@@ -47,20 +47,11 @@ var DomConstructor = (function(){
 	var elements = [];
 	return {
 		construct: function construct(params) {
-			var elem 		= document.createElement(params.elemType),
-				container 	= document.getElementById("container");
+			var elem 		= document.createElement(params.elemType);
 			elem.style.paddingBottom = "50px";
 			elem.innerHTML = params.content;
-			container.appendChild(elem);
 			elements.push(elem);
 			return elem;
-		},
-		clean: function clean() {
-			var container 	= document.getElementById("container");
-			elements.forEach(function(elem) {
-				container.removeChild(elem);
-			});
-			elements = [];
 		}
 	};
 
@@ -73,27 +64,39 @@ var VideoFeed = (function () {
 	    template 	= Object.create(TemplateConstructor),	
 	    dom 		= Object.create(DomConstructor),
 
-	    createElement = function(element){
+	    createElement = function createElement(element){
+	    	var res;
 	    	if (element){
-				dom.construct({	elemType 	:"div", 
-								content 	: template.construct(templates[element.type.toLowerCase()], element)
+				res = dom.construct({	elemType 	:"div", 
+										content 	: template.construct(templates[element.type.toLowerCase()], element)
 				});		
 			}
+			return res;
+		},
+		createElements = function createElements(result) {
+			var elements = [];
+			result.forEach(function(element){
+				var res = createElement(element);
+				if (res){
+					elements.push(res);
+				}
+			});
+			return elements;
 		};
 	return {
-		requestFeed: function requestFeed() {
-			dom.clean();
+		requestFeed: function requestFeed(startIndex, cb) {
 			var onResponse = function onResponse(json) {
 				var result = JSON.parse(json);
-				result.forEach(createElement);
+				// finish, send videos
+				cb(createElements(result));
 			};	
-			serverAPI.call("http://footbagisrael.com/slim/getAll", onResponse);
+			serverAPI.call("http://footbagisrael.com/slim/getAll", onResponse, "start="+startIndex);
 		},
-		searchByTags: function searchByTags(tags) {
-			dom.clean();
+		searchByTags: function searchByTags(tags, cb) {
 			var onResponse = function onResponse(json) {
 				var result = JSON.parse(json);
-				result.forEach(createElement);
+				// finish, send videos
+				cb(createElements(result));
 			};	
 			serverAPI.call("http://footbagisrael.com/slim/search", onResponse, "tags="+tags);
 		}
@@ -103,4 +106,3 @@ var VideoFeed = (function () {
 
 }());
  
-
