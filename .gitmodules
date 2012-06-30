@@ -1,0 +1,3 @@
+[submodule "php-feed"]
+	path = php-feed
+	url = https://github.com/duckson/php-feed.git
