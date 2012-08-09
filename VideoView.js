@@ -4,6 +4,14 @@ $(window).scroll(function(){
 			requestMore();
 		}
 });
+
+$("#controlsOpener").hide();
+
+var allowAddVideo = function allowAddVideo() {
+	$("#controlsOpener").show();
+	$("#controls").slideDown("fast");
+};
+
 // Adds open/close logic to add video button.
 $("#controlsOpener").click(function(){
 	if ($("#controls").is(":hidden")){
@@ -101,5 +109,25 @@ var appendElements = function appendElements(elements, viewMode) {
 	}
 };
 
-// Request initial feed
-requestSearch({clean:true});
+var extractGetParams = function extractGetParams() {
+	var prmstr = window.location.search.substr(1),
+		prmarr = prmstr.split ("&"),
+		params = {},
+		i,
+		tmparr;
+
+	for (i=0; i<prmarr.length; i++) {
+		tmparr = prmarr[i].split("=");
+		params[tmparr[0]] = tmparr[1];
+	}
+	return params;
+};
+
+// Request initial feed - either a specific video or a search, depending on url params.
+var videoview_params = extractGetParams();
+if (videoview_params.id) {
+	$("#scrollForMore").hide();
+	requestSearch({clean:true, id:videoview_params.id});
+}else {
+	requestSearch({clean:true});
+}

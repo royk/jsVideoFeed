@@ -57,7 +57,7 @@ var VideoServerLayer = (function () {
 			}
 		},
 		prepareResults = function prepareResults(result) {
-			result.forEach(function(element){
+			result.result.forEach(function(element){
 				prepareResult(element);
 			});
 			return result;
@@ -126,11 +126,21 @@ var VideoServerLayer = (function () {
 			return input;
 		};
 	return {
+
+		getVideoOfTheDay: function getVideoOfTheDay(cb) {
+			callServerGet(baseURL+"videoOfTheDay", "", cb);
+		},
+		getTotalVideosCount: function getTotalVideosCount(cb) {
+			callServerGet(baseURL+"count", "", cb);
+		},
 		requestFeed: function requestFeed(startIndex, cb) {
 			callServerGet(baseURL+"getAll", "start="+startIndex, cb);
 		},
 		searchByTags: function searchByTags(startIndex, tags, cb) {
 			callServerGet(baseURL+"search", "tags="+tags+"&start="+startIndex, cb);
+		},
+		searchByID: function searchByID(id, cb) {
+			callServerGet(baseURL+"get", "id="+id, cb);
 		},
 		updateEntry: function updateEntry(params, cb) {
 			callServerPost(baseURL+"modify", params, cb,{includeAllParams:false});
