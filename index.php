@@ -261,24 +261,40 @@ $app->post('/addVideo', function() use ($cacheFile) {
     $mysqldate = date('Y-m-d H:i:s');
     if (!$result){
         header('HTTP/1.0 500 Internal Server Error', true, 500);
-        die(json_encode(array('success'=>false, 'message'=>'Unknown DB error')));
+        die(json_encode(array('success'=>false, 'message'=>'Unknown DB error in fetch')));
     }
     $rowCount = mysql_num_rows($result);
     if ($rowCount==0){
+        $columns = "type,src,width,height,title,tags,players,maker,year,location,date";
+        $data_arr = array($_POST["source"], $_POST["id"], "500", "281", $_POST["title"], $_POST["tags"], $_POST["players"], $_POST["maker"], $_POST["year"], $_POST["location"], $mysqldate);
+        foreach ($data_arr as &$value) {
+            if (is_string($value)) {
+                $value = "'" . mysql_real_escape_string($value) . "'";
+            } else {
+                $value = "'" . $value . "'";
+            }
+        }
+        unset($value);
+        $data = implode(",", $data_arr);
+        echo $columns . " " . $data;
         $query = "INSERT INTO 
-        videos (type, src, width, height, title, tags, players, maker, year, location, date) 
-        VALUES 
-        ('$_POST[source]',  '$_POST[id]',  '500',  '281',  '$_POST[title]',  '$_POST[tags]', '$_POST[players]', '$_POST[maker]', '$_POST[year]', '$_POST[location]', '$mysqldate')";
-        if (!mysql_query($query)){
+            videos (". $columns . ") 
+            VALUES 
+            (". $data.")";
+        $result = mysql_query($query);
+        if (!$result){
             header('HTTP/1.0 500 Internal Server Error', true, 500);
-           die(json_encode(array('success'=>false, 'message'=>'Unknown DB error')));
+           die(json_encode(array('success'=>false, 'message'=>'Unknown DB error in add: '. mysql_error())));
         }
     }else{
         header('HTTP/1.0 400 Bad Request', true, 400);
         die(json_encode(array('success'=>false, 'message'=>'Video already exists')));
     }
+
     // clear video amount cache
-    unlink($cacheFile);
+    if (is_file($cacheFile)) {
+        unlink($cacheFile);
+    }
     die(json_encode(array('success'=>true, 'message'=>'Video saved')));
 });
 
@@ -321,7 +337,6 @@ $app->post('/modify', function () {
     }
     die(json_encode(array('success'=>true, 'message'=>'Video modified')));
 });
-
 //DELETE route
 $app->delete('/delete', function () {
 
