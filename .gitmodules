@@ -1,3 +1,6 @@
 [submodule "php-feed"]
 	path = php-feed
 	url = https://github.com/royk/php-feed.git
+[submodule "qunit"]
+	path = qunit
+	url = https://github.com/jquery/qunit.git

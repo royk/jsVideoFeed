@@ -1,0 +1,38 @@
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>jsVideoFeed tests</title>
+ 
+    <link rel="stylesheet" href="qunit/qunit/qunit.css" />
+    <script src="qunit/qunit/qunit.js"></script>
+    <script src="VideoController.js"></script>
+    <script>
+		test("DomConstructor functionality", function() {
+			var params = {id: "id", html: "<p>success!</p>"};
+			var result = DomConstructor.construct(params);
+			
+			equal(result instanceof HTMLElement, true);
+			equal(result.innerHTML, params.html);
+			equal(result.id, params.id);
+
+		});
+		test("TemplateConstructor functionality", function() {
+			var params = {id: "1", src: "source"};
+			var templates = {	view: '<yay id="{id}">{template}</yay>',
+								youtube: '<ytb src="{src}"/>',
+
+								edit: 'shouldnt be used here',
+								vimeo: 'shouldnt be used here'
+							};
+			var result = TemplateConstructor.construct(templates, "view", "youtube", params);
+
+			equal(result.id, params.id);
+			equal(result.html, '<yay id="1"><ytb src="source"/></yay>');
+
+		});
+	</script>
+	</head>
+<body>
+    <div id="qunit"></div>
+</body>
+</html>

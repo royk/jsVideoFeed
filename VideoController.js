@@ -2,7 +2,11 @@
 
 var V = {};
 
-V.hasFlash = swfobject.hasFlashPlayerVersion("9.0.18");
+if (typeof swfobject!=='undefined') {
+	V.hasFlash = swfobject.hasFlashPlayerVersion("9.0.18");
+} else {
+	V.hasFlash = false;
+}
 
 var requestIndex = 0;
 var canRequestMore = true;
@@ -77,7 +81,7 @@ var createViewElements = function createViewElements(items, mode) {
 	var elements = [];
 	items.forEach(function(video){
 		if (video) {
-			var result = TemplateConstructor.construct(mode, video.type.toLowerCase(), video);
+			var result = TemplateConstructor.construct(Templates, mode, video.type.toLowerCase(), video);
 			result.html = DomConstructor.construct(result);
 			elements.push(result);
 		}
@@ -104,25 +108,23 @@ var Templates = (function(){
 var TemplateConstructor = (function(){
 	"use strict";
 
-	var templates	= Object.create(Templates),
-		construct	= function construct(baseName, templateName, varsObj) {
-				var s,
-				regexp,
-				template = templates[templateName],
-				base	 = templates[baseName],
-				id		 = varsObj["id"];
-			for (s in varsObj){
-				regexp = new RegExp("{"+s+"}","gi");
-				template = template.replace(regexp, varsObj[s]);
-				base	 = base.replace(regexp, varsObj[s]);
-			}
-			regexp = new RegExp("{template}", "gi");
-			base = base.replace(regexp, template);
-			dataObjects[id] = varsObj;
-			return {html:base, id:varsObj["id"]};
-		};
 		return {
-		construct: construct
+			construct: function construct(templatesClass, baseName, templateName, varsObj) {
+					var s,
+					regexp,
+					template = templatesClass[templateName],
+					base	 = templatesClass[baseName],
+					id		 = varsObj["id"];
+				for (s in varsObj){
+					regexp = new RegExp("{"+s+"}","gi");
+					template = template.replace(regexp, varsObj[s]);
+					base	 = base.replace(regexp, varsObj[s]);
+				}
+				regexp = new RegExp("{template}", "gi");
+				base = base.replace(regexp, template);
+				dataObjects[id] = varsObj;
+				return {html:base, id:varsObj["id"]};
+			}
 	};
 }());
 
