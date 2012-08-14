@@ -131,3 +131,14 @@ if (videoview_params.id) {
 }else {
 	requestSearch({clean:true});
 }
+
+// Used by the controller when searches are over in lieu of an event
+var viewSearchCallback = function viewSearchCallback(shownResults, totalResults) {
+	if (totalResults) {
+		if(shownResults<totalResults) {
+			$("#scrollForMore").show();
+		} else {
+			$("#scrollForMore").hide();
+		}
+	}
+};

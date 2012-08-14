@@ -58,13 +58,7 @@ var requestVideosCB = function requestVideosCB(result) {
 			canRequestMore = true;
 		}, 500);
 		requestIndex += videos.length;
-		if (totalVideos) {
-			if(requestIndex<totalVideos) {
-				$("#scrollForMore").show();
-			} else {
-				$("#scrollForMore").hide();
-			}
-		}
+		viewSearchCallback(requestIndex, totalVideos);
 	}
 };
 
