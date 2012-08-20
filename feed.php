@@ -9,7 +9,7 @@ $database   = "poisonta_videofeed";
 $connection = mysql_connect('localhost', $user, $password);
 @mysql_select_db($database);
 
-$query = "SELECT * FROM videos ORDER BY id";
+$query = "SELECT * FROM videos WHERE deleted=0 ORDER BY id";
 $result = mysql_query($query);
 if (!$result){
     die(mysql_error());

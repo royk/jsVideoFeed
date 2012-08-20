@@ -1,6 +1,6 @@
 /*jshint smarttabs:true */
 
-var V = {};
+var V = {fakeAdd: false};
 
 if (typeof swfobject!=='undefined') {
 	V.hasFlash = swfobject.hasFlashPlayerVersion("9.0.18");

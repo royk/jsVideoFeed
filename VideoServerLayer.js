@@ -163,6 +163,9 @@ var VideoServerLayer = (function () {
 					year:	params.year,
 					location: params.location
 				};
+				if (V.fakeAdd) {
+					sendParams.deleted = "true";
+				}
 				callServerPost(baseURL+"addVideo", sendParams, cb, {includeAllParams:true});
 			}
 			

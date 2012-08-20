@@ -60,7 +60,7 @@ $app->get('/videoOfTheDay', function() use ($cacheFile) {
     if (isset($cache)) {
         if (!isset($cache->content[0]->videoOfTheDay) || $cache->day!=$dayNum) {
             $idOffset = rand(1, intval($cache->content[0]->count)) - 1;
-            $query = "SELECT * FROM videos ORDER BY id DESC LIMIT $idOffset,1";
+            $query = "SELECT * FROM videos WHERE deleted=0 ORDER BY id DESC LIMIT $idOffset,1";
             $result = mysql_query($query);
             if (!$result){
                 die(mysql_error());
@@ -90,7 +90,7 @@ $app->get('/count', function() use ($cacheFile) {
     }
     $dayNum = date("d") + date("m") + date("y");
     if (!isset($countCache) || intval($countCache->day)!=$dayNum) {
-        $query = "SELECT COUNT(id) FROM videos";
+        $query = "SELECT COUNT(id) FROM videos WHERE deleted=0";
         $result = mysql_query($query);
         if (!$result){
             die(mysql_error());
@@ -122,7 +122,7 @@ $app->get('/count', function() use ($cacheFile) {
 
 $app->get('/getAll', function () {
     $start = $_GET["start"];
-    $query = "SELECT SQL_CALC_FOUND_ROWS * FROM videos ORDER BY id DESC LIMIT $start,5";
+    $query = "SELECT SQL_CALC_FOUND_ROWS * FROM videos WHERE deleted=0 ORDER BY id DESC LIMIT $start,5";
     $result = mysql_query($query);
     $countResult = mysql_query("SELECT FOUND_ROWS()");
     if (!$result || !$countResult){
@@ -144,7 +144,7 @@ $app->get('/getAll', function () {
    
 });
 $app->get('/feed', function() {
-    $query = "SELECT * FROM videos ORDER BY id";
+    $query = "SELECT * FROM videos WHERE deleted=0 ORDER BY id";
     $result = mysql_query($query);
     if (!$result){
         die(mysql_error());
@@ -265,8 +265,9 @@ $app->post('/addVideo', function() use ($cacheFile) {
     }
     $rowCount = mysql_num_rows($result);
     if ($rowCount==0){
-        $columns = "type,src,width,height,title,tags,players,maker,year,location,date";
-        $data_arr = array($_POST["source"], $_POST["id"], "500", "281", $_POST["title"], $_POST["tags"], $_POST["players"], $_POST["maker"], $_POST["year"], $_POST["location"], $mysqldate);
+        $columns = "type,src,width,height,title,tags,players,maker,year,location,date,deleted";
+        $deleted = isset($_POST["deleted"]) ? 1 : 0;
+        $data_arr = array($_POST["source"], $_POST["id"], "500", "281", $_POST["title"], $_POST["tags"], $_POST["players"], $_POST["maker"], $_POST["year"], $_POST["location"], $mysqldate, $deleted);
         foreach ($data_arr as &$value) {
             if (is_string($value)) {
                 $value = "'" . mysql_real_escape_string($value) . "'";
@@ -276,7 +277,6 @@ $app->post('/addVideo', function() use ($cacheFile) {
         }
         unset($value);
         $data = implode(",", $data_arr);
-        echo $columns . " " . $data;
         $query = "INSERT INTO 
             videos (". $columns . ") 
             VALUES 
